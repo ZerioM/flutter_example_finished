@@ -1,7 +1,9 @@
 import 'package:example_finished/config/constants.dart';
 import 'package:example_finished/utils/mock_helper.dart';
-import 'package:example_finished/widgets/dismiss_background.dart';
+import 'package:example_finished/widgets/bottom_progress_bar.dart';
+import 'package:example_finished/widgets/update_name_popup.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class InfiniteList extends StatefulWidget {
   const InfiniteList({Key? key}) : super(key: key);
@@ -15,6 +17,7 @@ class _InfiniteListState extends State<InfiniteList> {
   final ScrollController _scrollController = ScrollController();
   List<String> items = [];
   bool loading = false, allLoaded = false;
+  int updatingItem = -1, addingItem = -1;
 
   // is called, when the state of an widget is initialized
   @override
@@ -47,24 +50,35 @@ class _InfiniteListState extends State<InfiniteList> {
                 itemBuilder: (context, index) 
                 {
                   if(index < items.length) {
-                    return Dismissible(
+                    return Slidable(
+
                       child: ListTile(
                         title: Text(items[index]),
                       ),
-                      background:
-                        const DismissBackground(text: Constants.deleteEntry, color: Colors.red, isLeft: true),
-                      secondaryBackground: 
-                        const DismissBackground(text: Constants.changeName, color: Colors.blue, isLeft: false),
-                      key: ValueKey<String>(items[index]),
-                      onDismissed: (DismissDirection direction) {
-                        if(direction == DismissDirection.startToEnd) {
-                          deleteElement(index);
-                        } else {
-                          goToUpdateElement(index);
-                        }
-                      }
+
+                      actionPane: const SlidableStrechActionPane(),
+
+                      actions: <Widget>[
+                        IconSlideAction(
+                          caption: Constants.changeName,
+                          color: Colors.blue,
+                          icon: Icons.update,
+                          onTap: () => goToUpdateElement(index),
+                        )
+                      ],
+
+                      secondaryActions: <Widget>[
+                        IconSlideAction(
+                          caption: Constants.deleteEntry,
+                          color: Colors.red,
+                          icon: Icons.delete,
+                          onTap: () => deleteElement(index),
+                        )
+                      ],
                     );
+
                   } else {
+
                     return SizedBox(
                       width: constraints.maxWidth,
                       height: 50,
@@ -79,21 +93,11 @@ class _InfiniteListState extends State<InfiniteList> {
                 {
                   return const Divider(height: 1);
                 }, 
-                itemCount: items.length + (allLoaded ? 1 : 0)
+                itemCount: items.length + (allLoaded ? 1 : 0),
               ),
               // TODO: why is this if statement so weird, what does it mean?
               if(loading)...[
-                Positioned(
-                  left: 0,
-                  bottom: 0,
-                  child: SizedBox(
-                    width: constraints.maxWidth,
-                    height: 80,
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  )
-                  )
+                BottomProgressBar(constraints: constraints)
               ]
             ]);
               
@@ -103,15 +107,17 @@ class _InfiniteListState extends State<InfiniteList> {
             );
         }
       },),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => openAddItemPopup(),
+        child: const Icon(Icons.add),
+        backgroundColor: Colors.orange.shade300),
     );
   }
 
   mockFetch() async {
     if(allLoaded) return;
 
-    setState(() {
-      loading = true;
-    });
+    setState(() => loading = true);
 
     List<String> newData = await MockHelper.mockList(items);
 
@@ -124,15 +130,27 @@ class _InfiniteListState extends State<InfiniteList> {
   }
 
   deleteElement(index) {
-    setState(() {
-      items.removeAt(index);
-    });
+    setState(() => items.removeAt(index));
   }
 
   goToUpdateElement(index) {
-    setState(() {
-      items.removeAt(index);
-    });
+    setState(() => updatingItem = index);
+    showDialog(context: context, builder: (BuildContext context) => UpdateNamePopup(index: index, itemTitle: items[index], closeUpdateScreen: closeUpdateScreen));
+  }
+
+  closeUpdateScreen(index, newName) {
+    items[index] = newName;
+    setState(() => updatingItem = -1);
+  }
+
+  openAddItemPopup() {
+    setState(() => addingItem = 1);
+    showDialog(context: context, builder: (BuildContext context) => UpdateNamePopup(index: -2, itemTitle: "New", closeUpdateScreen: addItem));
+  }
+
+  addItem(int index, String newName) {
+    items.add(newName);
+    setState(() => addingItem = -1);
   }
   
 }
