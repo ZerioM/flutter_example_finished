@@ -4,6 +4,6 @@ class MockHelper {
 
     return items.length >= 60 
         ? []
-        : List.generate(20, (index) => "List item ${index + items.length}");
+        : List.generate(12, (index) => "List item ${index + items.length}");
   }
 }
