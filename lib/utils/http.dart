@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 class Http {
 
   var client = http.Client();
-  String baseURL = 'https://ec2b-81-5-228-154.ngrok.io/';
+  String baseURL = 'https://9288-81-5-228-154.ngrok.io/';
 
   Future<List<Item>> getItems() async {
     final response = await client.get(Uri.parse(baseURL + 'items'));
@@ -27,12 +27,22 @@ class Http {
     return response.statusCode == 200 ? true : false;
   }
 
-  Future<bool> saveItemById(int id, String newTitle) async {
+  Future<bool> saveItemById(int index, String newTitle) async {
+    int id = index + 1;
     Item updateItem = Item(title: newTitle);
     final String json = jsonEncode(updateItem.toJson());
     String url = baseURL + 'items/' + id.toString();
 
     final response = await client.put(Uri.parse(url), body: json, headers: { "Content-Type": "application/json" });
+
+    return response.statusCode == 200 ? true : false;
+  }
+
+  Future<bool> deleteItemById(int index) async {
+    int id = index + 1;
+    String url = baseURL + 'items/' + id.toString();
+
+    final response = await client.delete(Uri.parse(url));
 
     return response.statusCode == 200 ? true : false;
   }

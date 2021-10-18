@@ -128,10 +128,6 @@ class _InfiniteListWithRestState extends State<InfiniteListWithRest> {
     });
   }
 
-  deleteElement(index) {
-    setState(() => items.removeAt(index));
-  }
-
   goToUpdateElement(index) {
     setState(() => updatingItem = index);
     showDialog(context: context, builder: (BuildContext context) => UpdateNamePopup(index: index, itemTitle: items[index].title, closeUpdateScreen: closeUpdateScreen));
@@ -170,6 +166,20 @@ class _InfiniteListWithRestState extends State<InfiniteListWithRest> {
       updatingItem = -1; 
       loading = false;
     });
+  }
+
+  deleteElement(index) async {
+    setState(() => loading = true);
+    final bool response = await httpController.deleteItemById(index);
+
+    if(response == true){
+      setState(() => items.removeAt(index));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(index.toString() + Constants.couldNotBeUpdated)));
+    }
+    
+    setState(() => loading = false);
   }
   
 }
