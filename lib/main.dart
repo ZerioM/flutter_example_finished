@@ -1,42 +1,55 @@
 import 'package:example_finished/tabs/list.dart';
-import 'package:example_finished/tabs/sensors.dart';
+import 'package:example_finished/tabs/sensor/sensors_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 
-void main() => runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Obtain a list of the available cameras on the device.
+  final cameras = await availableCameras();
+
+  debugPrint('cameras: $cameras');
+
+  final CameraDescription firstCamera = cameras[0];
+
+  // Get a specific camera from the list of available cameras.
+
+  runApp(MyApp(camera: firstCamera));
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  // ignore: prefer_const_constructors_in_immutables
+  MyApp({Key? key, required this.camera}) : super(key: key);
 
+  final CameraDescription camera;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.red,
       ),
       home: DefaultTabController(
-        length: 2, 
-        child: 
-        Scaffold(
-          appBar: 
-          AppBar(
-            bottom: 
-            const TabBar(
-              tabs: [
-                Tab(icon: Icon(Icons.list)),
-                Tab(icon: Icon(Icons.sensors)),
-              ],
+        length: 2,
+        child: Scaffold(
+            appBar: AppBar(
+              bottom: const TabBar(
+                tabs: [
+                  Tab(icon: Icon(Icons.list)),
+                  Tab(icon: Icon(Icons.sensors)),
+                ],
+              ),
+              title: const Text('Flutter Demo'),
             ),
-            title: const Text('Flutter Demo'),
-          ),
-          body: TabBarView(
-            children: [
+            body: TabBarView(children: [
               ListTab(),
-              SensorsTab(),
-            ]
-          )
-        ),
+              SensorTabScreen(
+                camera: camera,
+              ),
+            ])),
       ),
     );
   }
