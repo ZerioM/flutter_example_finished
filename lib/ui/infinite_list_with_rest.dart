@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:example_finished/config/constants.dart';
 import 'package:example_finished/utils/http.dart';
 import 'package:example_finished/widgets/bottom_progress_bar.dart';
@@ -13,7 +15,6 @@ class InfiniteListWithRest extends StatefulWidget {
 }
 
 class _InfiniteListWithRestState extends State<InfiniteListWithRest> {
-
   final ScrollController _scrollController = ScrollController();
   List<Item> items = [];
   bool loading = false, allLoaded = false;
@@ -26,7 +27,8 @@ class _InfiniteListWithRestState extends State<InfiniteListWithRest> {
     super.initState();
     fetch();
     _scrollController.addListener(() {
-      if(_scrollController.position.pixels >= _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent) {
         // fetch();
       }
     });
@@ -42,23 +44,26 @@ class _InfiniteListWithRestState extends State<InfiniteListWithRest> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LayoutBuilder(builder: (context, constraints) {
-        if(items.isNotEmpty){
-          return Stack(
-            children: [
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (items.isNotEmpty) {
+            return Stack(children: [
               ListView.separated(
                 controller: _scrollController,
-                itemBuilder: (context, index) 
-                {
-                  if(index < items.length) {
+                itemBuilder: (context, index) {
+                  if (index < items.length) {
                     return Slidable(
-
                       child: ListTile(
                         title: Text(items[index].title),
+                        trailing: items[index].icon != null
+                            ? CircleAvatar(
+                                backgroundImage: NetworkImage(items[index]
+                                    .icon
+                                    .path), // no matter how big it is, it won't overflow
+                              )
+                            : const Text("No Image"),
                       ),
-
                       actionPane: const SlidableStrechActionPane(),
-
                       actions: <Widget>[
                         IconSlideAction(
                           caption: Constants.changeName,
@@ -67,61 +72,53 @@ class _InfiniteListWithRestState extends State<InfiniteListWithRest> {
                           onTap: () => goToUpdateElement(index),
                         )
                       ],
-
                       secondaryActions: <Widget>[
                         IconSlideAction(
                           caption: Constants.deleteEntry,
                           color: Colors.red,
                           icon: Icons.delete,
-                          onTap: () => deleteElement(index),
+                          onTap: () => deleteElement(items[index].id, index),
                         )
                       ],
                     );
-
                   } else {
-
                     return SizedBox(
                       width: constraints.maxWidth,
                       height: 50,
                       child: const Center(
-                        child: Text(Constants.nothingMoreToLoad)
-                      ),
+                          child: Text(Constants.nothingMoreToLoad)),
                     );
                   }
-                  
-                }, 
-                separatorBuilder: (context,index) 
-                {
+                },
+                separatorBuilder: (context, index) {
                   return const Divider(height: 1);
-                }, 
+                },
                 itemCount: items.length + (allLoaded ? 1 : 0),
               ),
+
               // TODO: why is this if statement so weird, what does it mean?
-              if(loading)...[
-                BottomProgressBar(constraints: constraints)
-              ]
+              if (loading) ...[BottomProgressBar(constraints: constraints)]
             ]);
-              
-        } else {
-          return const Center(
+          } else {
+            return const Center(
               child: CircularProgressIndicator(),
             );
-        }
-      },),
+          }
+        },
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => openAddItemPopup(),
-        child: const Icon(Icons.add),
-        backgroundColor: Colors.orange.shade300),
+          onPressed: () => openAddItemPopup(),
+          child: const Icon(Icons.add),
+          backgroundColor: Colors.orange.shade300),
     );
   }
 
   fetch() async {
-    if(allLoaded) return;
+    if (allLoaded) return;
 
     setState(() => loading = true);
 
     items = await httpController.getItems();
-
     setState(() {
       loading = false;
       allLoaded = items.isEmpty;
@@ -130,56 +127,69 @@ class _InfiniteListWithRestState extends State<InfiniteListWithRest> {
 
   goToUpdateElement(index) {
     setState(() => updatingItem = index);
-    showDialog(context: context, builder: (BuildContext context) => UpdateNamePopup(index: index, itemTitle: items[index].title, closeUpdateScreen: closeUpdateScreen));
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => UpdateNamePopupWidget(
+            index: index,
+            itemTitle: items[index].title,
+            closeUpdateScreen: closeUpdateScreen,
+            item: items[index]));
   }
 
   openAddItemPopup() {
     setState(() => addingItem = 1);
-    showDialog(context: context, builder: (BuildContext context) => UpdateNamePopup(index: -2, itemTitle: "New", closeUpdateScreen: addItem));
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => UpdateNamePopupWidget(
+            index: -2, itemTitle: "New", closeUpdateScreen: addItem));
   }
 
-  addItem(int index, String newName) async {
+  addItem(int index, String newName, dynamic icon, dynamic id) async {
     setState(() => loading = true);
-    final bool response = await httpController.addItem(newName);
-    if(response == true) {
-      items.add(Item(title: newName));
+    final bool response =
+        await httpController.addItem(newName, index + 1, icon);
+    if (response == true) {
+      fetch();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(newName + Constants.couldNotBeSaved)));
+          SnackBar(content: Text(newName + Constants.couldNotBeSaved)));
     }
-    setState(() { 
-      addingItem = -1; 
+    setState(() {
+      addingItem = -1;
       loading = false;
     });
   }
 
-  closeUpdateScreen(int index, String newName) async {
+  closeUpdateScreen(int index, String newName, icon, int id) async {
     setState(() => loading = true);
-    final bool response = await httpController.saveItemById(index, newName);
-    if(response == true) {
+    final bool response = await httpController.saveItemById(id, newName, icon);
+    if (response == true) {
       items[index].title = newName;
+      items[index].icon = icon;
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(newName + ", index: " + index.toString() + Constants.couldNotBeUpdated)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(newName +
+              ", index: " +
+              index.toString() +
+              Constants.couldNotBeUpdated)));
     }
-    setState(() { 
-      updatingItem = -1; 
+    setState(() {
+      updatingItem = -1;
       loading = false;
     });
   }
 
-  deleteElement(index) async {
+  deleteElement(id, index) async {
     setState(() => loading = true);
-    final bool response = await httpController.deleteItemById(index);
+    final bool response = await httpController.deleteItemById(id);
 
-    if(response == true){
+    if (response == true) {
       setState(() => items.removeAt(index));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(index.toString() + Constants.couldNotBeUpdated)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(index.toString() + Constants.couldNotBeUpdated)));
     }
-    
+
     setState(() => loading = false);
   }
-  
 }

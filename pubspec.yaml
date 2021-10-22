@@ -37,6 +37,8 @@ dependencies:
   flutter_slidable: 
   http:
   camera: ^0.9.4+2
+  image_picker: ^0.8.4+3
+  dio: ^4.0.0
 
 dev_dependencies:
   flutter_test:

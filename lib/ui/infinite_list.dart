@@ -135,7 +135,7 @@ class _InfiniteListState extends State<InfiniteList> {
 
   goToUpdateElement(index) {
     setState(() => updatingItem = index);
-    showDialog(context: context, builder: (BuildContext context) => UpdateNamePopup(index: index, itemTitle: items[index], closeUpdateScreen: closeUpdateScreen));
+    showDialog(context: context, builder: (BuildContext context) => UpdateNamePopupWidget(index: index, itemTitle: items[index], closeUpdateScreen: closeUpdateScreen));
   }
 
   closeUpdateScreen(index, newName) {
@@ -145,7 +145,7 @@ class _InfiniteListState extends State<InfiniteList> {
 
   openAddItemPopup() {
     setState(() => addingItem = 1);
-    showDialog(context: context, builder: (BuildContext context) => UpdateNamePopup(index: -2, itemTitle: "New", closeUpdateScreen: addItem));
+    showDialog(context: context, builder: (BuildContext context) => UpdateNamePopupWidget(index: -2, itemTitle: "New", closeUpdateScreen: addItem));
   }
 
   addItem(int index, String newName) {
