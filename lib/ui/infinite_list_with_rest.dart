@@ -160,12 +160,11 @@ class _InfiniteListWithRestState extends State<InfiniteListWithRest> {
     });
   }
 
-  closeUpdateScreen(int index, String newName, icon, int id) async {
+  closeUpdateScreen(int index, String newName, dynamic icon, int id) async {
     setState(() => loading = true);
     final bool response = await httpController.saveItemById(id, newName, icon);
     if (response == true) {
-      items[index].title = newName;
-      items[index].icon = icon;
+      fetch();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(newName +
