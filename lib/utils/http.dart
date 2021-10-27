@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:example_finished/config/http_config.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
@@ -8,9 +9,9 @@ import 'package:dio/dio.dart';
 class Http {
   var client = http.Client();
   String baseURL =
-      'http://055a-2a02-8388-19c1-cf80-51fb-565a-c7b8-df13.ngrok.io/';
+      'http://${HttpConfig.ngrokId}.ngrok.io/';
   String imageBaseURL =
-      'http://055a-2a02-8388-19c1-cf80-51fb-565a-c7b8-df13.ngrok.io';
+      'http://${HttpConfig.ngrokId}.ngrok.io';
 
   Future<List<Item>> getItems() async {
     final response = await client
