@@ -15,9 +15,8 @@ class SensorTabScreen extends StatefulWidget {
 }
 
 class SensorTabScreenState extends State<SensorTabScreen> {
-   SensorTabScreenState({this.image}): super();
 
-  late final XFile? image;
+  late dynamic _image = "";
   final ImagePicker _picker = ImagePicker();
 
   // ignore: prefer_typing_uninitialized_variables
@@ -30,29 +29,28 @@ class SensorTabScreenState extends State<SensorTabScreen> {
         ElevatedButton(
             child: const Text('Open File Picker'),
             onPressed: () async {
-              final _image =
-                  await _picker.pickImage(source: ImageSource.gallery);
-              setState(() => image = _image);
+              final image = await _picker.pickImage(source: ImageSource.gallery);
+              setState(() => _image = image);
 
               // Navigate to second route when tapped.
             }),
         ElevatedButton(
             child: const Text('Open Camera'),
             onPressed: () async {
-              final _image = await Navigator.push(
+              final image = await Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
                         TakePictureScreen(camera: widget.camera)),
               );
-              setState(() => image = _image);
+              setState(() => _image = image);
 
               // Navigate to second route when tapped.
             }),
         Padding(
             padding: const EdgeInsets.all(10),
-            child: image != null
-                ? Image.file(File(image!.path),
+            child: _image != ""
+                ? Image.file(File(_image!.path),
                     scale: 0.5, fit: BoxFit.contain, height: 400)
                 : const Text("No image!"))
       ]),

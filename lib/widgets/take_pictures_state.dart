@@ -47,9 +47,6 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Take a picture')),
-      // You must wait until the controller is initialized before displaying the
-      // camera preview. Use a FutureBuilder to display a loading spinner until the
-      // controller has finished initializing.
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
@@ -62,8 +59,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           }
         },
       ),
-      floatingActionButton: Center(
-          child: FloatingActionButton(
+      
+      floatingActionButton:  Center(
+          child:  FloatingActionButton(
         // Provide an onPressed callback.
         onPressed: () async {
           // Take the Picture in a try / catch block. If anything goes wrong,
@@ -74,8 +72,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
             setState(() {
               loading = true;
             });
-            // Attempt to take a picture and get the file `image`
-            // where it was saved.
+     
             late dynamic image = "";
             await _controller.takePicture().then((value) => {
                   image = value,
@@ -84,13 +81,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
                   })
                 });
 
-            // If the picture was taken, display it on a new screen.
-            // Navigator.pop(context, {image: image});
-
             Navigator.pop(context, image);
           } catch (e) {
-            // If an error occurs, log the error to the console.
-            // ignore: avoid_print
             print(e);
           }
         },
