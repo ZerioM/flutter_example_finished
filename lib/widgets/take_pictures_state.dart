@@ -1,9 +1,20 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
 
-import '../screens/take_picture_screen.dart';
+class TakePictureScreen extends StatefulWidget{
+   const TakePictureScreen({
+    Key? key,
+     this.camera,
+  }) : super(key: key);
 
+  final CameraDescription? camera;
+
+  @override
+  TakePictureScreenState createState() => TakePictureScreenState();
+
+}
 class TakePictureScreenState extends State<TakePictureScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
@@ -14,13 +25,13 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     super.initState();
     // To display the current output from the Camera,
     // create a CameraController.
+
     _controller = CameraController(
       // Get a specific camera from the list of available cameras.
-      widget.camera,
+      widget.camera!,
       // Define the resolution to use.
       ResolutionPreset.medium,
     );
-
     // Next, initialize the controller. This returns a Future.
     _initializeControllerFuture = _controller.initialize();
   }

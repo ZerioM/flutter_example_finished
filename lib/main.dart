@@ -1,10 +1,11 @@
 import 'package:example_finished/tabs/list.dart';
-import 'package:example_finished/tabs/sensor/sensors_screen.dart';
+import 'package:example_finished/tabs/sensor_state.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 
 Future<void> main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
 
   // Obtain a list of the available cameras on the device.
@@ -21,9 +22,9 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
-  MyApp({Key? key, required this.camera}) : super(key: key);
+  MyApp({Key? key,  this.camera}) : super(key: key);
 
-  final CameraDescription camera;
+  final CameraDescription? camera;
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

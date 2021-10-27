@@ -1,11 +1,23 @@
 import 'dart:io';
-import 'package:example_finished/modules/camera/screens/take_picture_screen.dart';
-import 'package:example_finished/tabs/sensor/sensors_screen.dart';
+import 'package:camera/camera.dart';
+import 'package:example_finished/widgets/take_pictures_state.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+class SensorTabScreen extends StatefulWidget {
+  const SensorTabScreen({
+    Key? key,
+    this.camera,
+  }) : super(key: key);
+  final CameraDescription? camera;
+  @override
+  SensorTabScreenState createState() => SensorTabScreenState();
+}
+
 class SensorTabScreenState extends State<SensorTabScreen> {
-  late dynamic _image = "";
+   SensorTabScreenState({this.image}): super();
+
+  late final XFile? image;
   final ImagePicker _picker = ImagePicker();
 
   // ignore: prefer_typing_uninitialized_variables
@@ -18,29 +30,30 @@ class SensorTabScreenState extends State<SensorTabScreen> {
         ElevatedButton(
             child: const Text('Open File Picker'),
             onPressed: () async {
-              final image =
+              final _image =
                   await _picker.pickImage(source: ImageSource.gallery);
-              setState(() => _image = image);
+              setState(() => image = _image);
 
               // Navigate to second route when tapped.
             }),
         ElevatedButton(
             child: const Text('Open Camera'),
             onPressed: () async {
-              final image = await Navigator.push(
+              final _image = await Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) =>
                         TakePictureScreen(camera: widget.camera)),
               );
-              setState(() => _image = image);
+              setState(() => image = _image);
 
               // Navigate to second route when tapped.
             }),
         Padding(
             padding: const EdgeInsets.all(10),
-            child: _image != ""
-                ? Image.file(File(_image!.path),scale: 0.5, fit: BoxFit.contain, height: 400)
+            child: image != null
+                ? Image.file(File(image!.path),
+                    scale: 0.5, fit: BoxFit.contain, height: 400)
                 : const Text("No image!"))
       ]),
     ));

@@ -52,7 +52,7 @@ class Http {
   Future<bool> saveItemById(int index, String newTitle, dynamic icon) async {
     var dio = Dio();
 
-     Item newItem = Item(title: newTitle, id: index);
+    Item newItem = Item(title: newTitle, id: index);
     final String jsonData = jsonEncode(newItem.toJson());
 
     final itemResponse = await dio.put(baseURL + "items/" + index.toString(),
@@ -60,14 +60,14 @@ class Http {
 
     if(icon != null){
 
-    FormData form = FormData.fromMap({
-      "files": MultipartFile.fromFileSync(icon.path,
-          filename: icon.name, contentType: MediaType('image', 'jpg')),
-      "refId": index,
-      "ref": "items",
-      "field": "icon"
-    });
-    final response = await dio.post(baseURL + "upload",
+      FormData form = FormData.fromMap({
+        "files": MultipartFile.fromFileSync(icon.path,
+            filename: icon.name, contentType: MediaType('image', 'jpg')),
+        "refId": index,
+        "ref": "items",
+        "field": "icon"
+      });
+      final response = await dio.post(baseURL + "upload",
         data: form, options: Options(contentType: "multipart/form-data"));
     }
     return itemResponse.statusCode == 200 ? true : false;
